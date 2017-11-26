@@ -6,6 +6,9 @@ import sys
 import math
 import os
 
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+
 
 import ui_design #import form from '/reworked/ui_design.py'
 from  all_calculations import All_calculations #import all math functions
@@ -42,21 +45,36 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
         #     self.progressBar.setValue(self.completed)
         #     self.tabWidget.setTabEnabled(1, False)
 
-        prepearedText = self.all_calculations.splitText(4)
-        new_symbols_Text = self.all_calculations.calcNewSymbols(prepearedText)
-        print("hui", new_symbols_Text)
+        self.prepearedText = self.all_calculations.splitText(4)
+        new_symbols_Text = self.all_calculations.calcNewSymbols(self.prepearedText)
+        self.fill_table(4, new_symbols_Text)
         self.tabWidget.setTabEnabled(1, True)
 
 
-    def fill_table(self, tableNumber):
+    def fill_table(self, tableNumber, text):
         if tableNumber == 1:
-            print("1")
+            pass
         elif tableNumber == 2:
             pass
         elif tableNumber == 3:
             pass
         elif tableNumber == 4:
-            pass
+            big_P_x = self.all_calculations.calculate_P_tab4()
+            self.tableWidget_3.setRowCount(len(text))
+            for itemRow in range(0,len(text)):
+                item0 = QTableWidgetItem(0)
+                item0.setData(Qt.DisplayRole,itemRow)
+                item1 = QTableWidgetItem(1)
+                item1.setText(str(self.prepearedText[itemRow]))
+                item2 = QTableWidgetItem(2)
+                item2.setText(str(text[itemRow]))
+                item3 = QTableWidgetItem(3)
+                item3.setText(str(big_P_x[itemRow]))
+                #self.setTab4.append(,self.readyText[itemRow], self.newWordsText[itemRow], self.big_P_x[itemRow])
+                self.tableWidget_3.setItem(itemRow,0,item0)
+                self.tableWidget_3.setItem(itemRow,1,item1)
+                self.tableWidget_3.setItem(itemRow,2,item2)
+                self.tableWidget_3.setItem(itemRow,3,item3)
         else:
             return
 

@@ -9,7 +9,7 @@ from nltk import ngrams
 
 class All_calculations():
     def __init__(self, text):
-        self.readyText = text
+        self.readyText = text.decode('utf8')
 
     def splitText(self, n):
         # if self.isSliced:
@@ -18,7 +18,9 @@ class All_calculations():
         splittedText = []
         n_grams = ngrams(list(self.readyText), n)
         for gram in n_grams:
-            splittedText.append(gram[0]+gram[1]+gram[2]+gram[3])
+            ngram = str(gram[0]+gram[1]+gram[2]+gram[3])
+            splittedText.append(ngram)
+        print(splittedText)
         return splittedText
 
     #this func is for calc f value particular/general
@@ -38,17 +40,6 @@ class All_calculations():
         #or 0
         readyItems = []
         binaryItems = []
-        # binaryItems.append(1)
-        # item = 1
-        #for item in range(1, len( self.readyText)):
-        # while item < len(text):
-        #     try:
-        #         result = text[:item].index(text[item])
-        #         item+=1
-        #         binaryItems.append(0)
-        #     except ValueError:
-        #         item+=1
-        #         binaryItems.append(1)
         for item in text:
             try:
                 result = readyItems.index(item)
@@ -65,12 +56,12 @@ class All_calculations():
     def calculate_P_tab4(self):
         result = []
         summary = 0
-        for item in self.newWordsText:
+        for item in self.readyText:
             if item:
                 summary += 1
         value = 1 / summary
         current = 0
-        for item in self.newWordsText:
+        for item in self.readyText:
             if item:
                 current += value
             result.append(current)
