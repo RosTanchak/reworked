@@ -1,15 +1,21 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import division, unicode_literals
+
 import sys
 from itertools import izip, islice, tee
 import math
 import time
 import textwrap
+from collections import Counter
 
 from nltk import ngrams
 
 
 class All_calculations():
     def __init__(self, text):
-        self.readyText = text.decode('utf8')
+        self.readyText = unicode(text, "utf-8")
 
     def splitText(self, n):
         # if self.isSliced:
@@ -18,16 +24,15 @@ class All_calculations():
         splittedText = []
         n_grams = ngrams(list(self.readyText), n)
         for gram in n_grams:
-            ngram = str(gram[0]+gram[1]+gram[2]+gram[3])
+            ngram = ''.join(gram)
             splittedText.append(ngram)
-        print(splittedText)
         return splittedText
 
     #this func is for calc f value particular/general
     def calcf(self, valuesF):
         values_f = []
         for item in range(len(valuesF)):
-            values_f.append(valuesF[item]/len(self.originalText))
+            values_f.append(valuesF[item]/len(self.readyText))
         #values_f = [item / len(valuesF) for item in valuesF]
         return values_f
 
@@ -53,15 +58,15 @@ class All_calculations():
 
     #this function is copy pasted from parent projecs as it is
     #it shoul count P(x) in interval from [1;0], so be attentive
-    def calculate_P_tab4(self):
+    def calculate_P_tab4(self, text):
         result = []
         summary = 0
-        for item in self.readyText:
+        for item in text:
             if item:
                 summary += 1
         value = 1 / summary
         current = 0
-        for item in self.readyText:
+        for item in text:
             if item:
                 current += value
             result.append(current)
@@ -117,7 +122,8 @@ class All_calculations():
 
     #LAst tab(2, second Dti)
     #this function make chunks depent on smth
-    def calcSecTab (self):
+    def calcSecTab (self, text):
+        self.newWordsText = text
         fn = 1
         st = 0
         dti = {}
@@ -135,8 +141,7 @@ class All_calculations():
             else:
                 autoChunk.append(item)
         self.result_tap_2 = sorted(autoChunk, reverse = True)
-        self.calc_Big_P_tab2()
-        self.fillTableTab2()
+        return self.result_tap_2
 
     #this func calc P(x) for tab2
     def calc_Big_P_tab2(self):
@@ -148,3 +153,4 @@ class All_calculations():
             current = current - (item / summary)
         #self.result_P_tap_2 = result[::1]
         self.result_P_tap_2 = result
+        return result
