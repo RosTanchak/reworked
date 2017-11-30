@@ -10,22 +10,22 @@ import time
 import textwrap
 from collections import Counter
 
-from nltk import ngrams
+# from nltk import ngrams
 
 
 class All_calculations():
     def __init__(self, text):
         self.readyText = unicode(text, "utf-8")
 
-    def splitText(self, n):
-        # if self.isSliced:
-        #     slicedtext = self.readyText[self.startIn:self.startIn + self.finishIn]
-        # else:
+    def splitText(self, n, isSliced, startIn, finishIn):
+        if isSliced:
+            slicedtext = self.readyText[startIn: startIn + finishIn]
+        else:
+            slicedtext = self.readyText
+        slicedtext = slicedtext.decode('utf8')
         splittedText = []
-        n_grams = ngrams(list(self.readyText), n)
-        for gram in n_grams:
-            ngram = ''.join(gram)
-            splittedText.append(ngram)
+        for item in range(len(slicedtext) - n):
+            splittedText.append(slicedtext[item:item + n])
         return splittedText
 
     #this func is for calc f value particular/general
@@ -39,22 +39,23 @@ class All_calculations():
     #NEW SYMBOLS TAB(4th tab)
     #this function run into text and match all first time userd symbols or
     #ngramms as 1 and already seen as 0
-    def calcNewSymbols(self, text):
-        #In this loop, finally all matched indexes is set to 1 other is 0
-        #check whether firs tTimeM atchedItems index = index of readyText and set 1
-        #or 0
-        readyItems = []
-        binaryItems = []
-        for item in text:
-            try:
-                result = readyItems.index(item)
-                binaryItems.append(0)
-                readyItems.append(item)
-            except ValueError:
-                binaryItems.append(1)
-                readyItems.append(item)
-        self.newWordsText = binaryItems
-        return self.newWordsText
+
+    # def calcNewSymbols(self, text):
+    #     #In this loop, finally all matched indexes is set to 1 other is 0
+    #     #check whether firs tTimeM atchedItems index = index of readyText and set 1
+    #     #or 0
+    #     readyItems = []
+    #     binaryItems = []
+    #     for item in text:
+    #         try:
+    #             result = readyItems.index(item)
+    #             binaryItems.append(0)
+    #             readyItems.append(item)
+    #         except ValueError:
+    #             binaryItems.append(1)
+    #             readyItems.append(item)
+    #     self.newWordsText = binaryItems
+    #     return self.newWordsText
 
     #this function is copy pasted from parent projecs as it is
     #it shoul count P(x) in interval from [1;0], so be attentive
@@ -73,10 +74,10 @@ class All_calculations():
         return result
 
     #this function chunks readyText for intervals(which value we get from  input)
-    def chunksIntervals(self):
-        self.getFromLineEdit()
-        self.chunkedText = zip(*[iter(self.newWordsText)] * self.NumberOfIntervalsItems)
-        self.get_p_tab3()
+    def chunksIntervals(self, text, N):
+        self.chunkedText = zip(*[iter(text)] * N)
+        print(self.chunkedText, N)
+        return self.chunkedText
 
     #this function is copied from c# parent. No matter how it works
     def get_p_tab3(self):
