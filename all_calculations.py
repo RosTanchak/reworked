@@ -19,7 +19,7 @@ class All_calculations():
         self.pad3_p = []
         self.N = N
         self.readyText = unicode(text, "utf-8")
-        for i in range(N):
+        for i in range(self.N):
             self.pad3_p.append([])
 
     def splitText(self, n, isSliced, startIn, finishIn):
@@ -80,16 +80,20 @@ class All_calculations():
 
     #this function chunks readyText for intervals(which value we get from  input)
     def chunksIntervals(self, text):
-        self.chunkedText = zip(*[iter(text)] * self.N)
+        self.chunksN = int(len(text) / self.N)
+        self.chunkedText = zip(*[iter(text)] * self.chunksN)
         index = 0
         summary = sum(text)
+        self.results3Pad = []
+        self.results3Pad.append(summary)
         for item in self.chunkedText:
             self.pad3_p[index].append(self.get_p_tab3(item, summary))
+            index+=1
 
 
     #this function is copied from c# parent. No matter how it works
     def get_p_tab3(self, item, summary):
-        p = sum(item) / summary
+        p = sum(item) / len(item)
         # result = []
         # for item in self.chunkedText):
 
@@ -105,12 +109,36 @@ class All_calculations():
 
     #this function is copied from c# parent. No metter how it works(on previous interval get value)
     #takes sum of new words from previous intervals and get 1 - sum  new words on  prev intervals / general_summary
+
+    def calculate_p_3(self,steps):
+        self.small_p_3 = []
+        self.p_i_schtrich = []
+        self.P_pad3 = []
+        for item in self.pad3_p:
+            self.small_p_3.append(sum(item)/steps)
+        # self.p_pad3 = sorted(result, reverse = True)
+        for item in self.small_p_3:
+            self.p_i_schtrich.append(item/sum(self.small_p_3))
+
+        current_p = 1
+        for item in self.p_i_schtrich:
+            self.P_pad3.append(current_p - (item/len(self.p_i_schtrich)))
+        return True
+
+    def clearAll(self):
+        self.small_p_3 = []
+        self.p_i_schtrich = []
+        self.P_pad3 = []
+        for i in range(self.N):
+            self.pad3_p[i] = []
+
+
     def get_P_tab3(self):
         result = []
         current_p = 1.0
-        for index in range(len(self.chunkedText)):
+        for index in range(len(self.p_i_schtrich)):
             summary = 0
-            for item in self.chunkedText[index]:
+            for item in self.pad3_p[index]:
                 if item:
                     summary+=1
             result.append(summary)
@@ -123,13 +151,13 @@ class All_calculations():
         self.calcAverage()
 
     #this function calculate average items
-    def calcAverage(self):
-        self.listOfAverages = []
-        average = int(self.NumberOfIntervalsItems)
-        for item in range(len(self.chunkedText)):
-            self.listOfAverages.append(average)
-            average += self.NumberOfIntervalsItems
-        self.fillTableTab3()
+    # def calcAverage(self):
+    #     self.listOfAverages = []
+    #     average = int(self.NumberOfIntervalsItems)
+    #     for item in range(len(self.chunkedText)):
+    #         self.listOfAverages.append(average)
+    #         average += self.NumberOfIntervalsItems
+    #     self.fillTableTab3()
 
     #LAst tab(2, second Dti)
     #this function make chunks depent on smth
