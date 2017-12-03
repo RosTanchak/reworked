@@ -79,6 +79,12 @@ class All_calculations():
             result.append(current)
         return result
 
+    def setIntervals(self, N):
+        self.N = N
+        self.pad3_p = []
+        for i in range(self.N):
+            self.pad3_p.append([])
+
     #this function chunks readyText for intervals(which value we get from  input)
     def chunksIntervals(self, text):
         self.chunksN = int(len(text) / self.N)
@@ -118,15 +124,15 @@ class All_calculations():
         self.p_i_schtrich = []
         self.P_pad3 = []
         for item in self.pad3_p:
-            print(item)
             self.small_p_3.append(sum(item)/steps)
         # self.p_pad3 = sorted(result, reverse = True)
         for item in self.small_p_3:
             self.p_i_schtrich.append(item/sum(self.small_p_3))
 
         current_p = 1
-        for item in self.p_i_schtrich:
-            self.P_pad3.append(current_p - (item/len(self.p_i_schtrich)))
+        self.P_pad3.append(current_p)
+        for item in self.p_i_schtrich[1:]:
+            self.P_pad3.append(current_p - (item/sum(self.p_i_schtrich)))
         return True
 
     def clearAll(self):
@@ -137,7 +143,7 @@ class All_calculations():
         for i in range(self.N):
             self.pad3_p[i] = []
 
-    # 
+    #
     # def get_P_tab3(self,steps):
     #     current_p = 1.0
     #     new_result = []
