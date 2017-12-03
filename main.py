@@ -25,18 +25,23 @@ import ui_design #import form from '/reworked/ui_design.py'
 from  all_calculations import All_calculations #import all math functions
 #from thread import CalculateThread #import calculatin thread
 
-
+#calculate3pad(1,2,4)
 class CalculateThread(QThread):
-    def __init__(self, text, prepearedText, isSliced, step, wholeText):
+    def __init__(self, text, prepearedText, isSliced, steps, step, wholeText, N):
         QThread.__init__(self)
         self.originalText = text
         self.prepearedText = prepearedText
+        self.prepearedTextLength = len(prepearedText)
+        self.steps = steps
         self.step = step
+        self.N = int(len(prepearedText) / N)
         self.isSliced = isSliced
         self.wholeText = wholeText
+        self.all_calculations = All_calculations(text, self.N)
 
     def __del__(self):
         self.wait()
+
     #calculate new symbols in background
     def run(self):
         text = self.prepearedText
@@ -62,9 +67,75 @@ class CalculateThread(QThread):
         self.emit(SIGNAL('fill_table(QString)'), str(4))
         #special for 3rd tab
 
+        k_text_len = self.prepearedTextLength
+        index = 0
+        p_arrays = []
+        while k_text_len == self.prepearedTextLength:
+            k_text = self.new_symbols_Text[index : index + self.prepearedTextLength]
+            index += self.step
+            k_text_len = len(k_text)
+            p_arrays.append(self.all_calculations.chunksIntervals(self.new_symbols_Text))
+            # p_arrays.append(sum(k_text))
+            self.emit(SIGNAL('updateProgress(QString)'), "1")
+
+        print(self.all_calculations.pad3_p)
         self.emit(SIGNAL('fill_table(QString)'), str(3))
 
+#calculate3pad
+class CalculateThread(QThread):
+    def __init__(self, text, prepearedText, isSliced, steps, step, wholeText, N):
+        QThread.__init__(self)
+        self.originalText = text
+        self.prepearedText = prepearedText
+        self.prepearedTextLength = len(prepearedText)
+        self.steps = steps
+        self.step = step
+        self.N = int(len(prepearedText) / N)
+        self.isSliced = isSliced
+        self.wholeText = wholeText
+        self.all_calculations = All_calculations(text, self.N)
 
+    def __del__(self):
+        self.wait()
+
+    #calculate new symbols in background
+    def run(self):
+        text = self.prepearedText
+        if self.isSliced == True and self.step > 0:
+            text = self.wholeText
+        readyItems = []
+        binaryItems = []
+        self.new_symbols_Text = []
+        for item in text:
+            try:
+                result = readyItems.index(item)
+                self.emit(SIGNAL('add_binary(QString)'), str(0))
+                readyItems.append(item)
+                self.new_symbols_Text.append(0)
+                # self.emit(SIGNAL('add_ready(QString)'), str(item))
+            except ValueError:
+                self.emit(SIGNAL('add_binary(QString)'), str(1))
+                self.new_symbols_Text.append(1)
+                readyItems.append(item)
+                # self.emit(SIGNAL('add_ready(QString)'), str(item))
+        self.emit(SIGNAL('fill_table(QString)'), str(1))
+        self.emit(SIGNAL('fill_table(QString)'), str(2))
+        self.emit(SIGNAL('fill_table(QString)'), str(4))
+        #special for 3rd tab
+
+        k_text_len = self.prepearedTextLength
+        index = 0
+        p_arrays = []
+        while k_text_len == self.prepearedTextLength:
+            k_text = self.new_symbols_Text[index : index + self.prepearedTextLength]
+            index += self.step
+            k_text_len = len(k_text)
+            p_arrays.append(self.all_calculations.chunksIntervals(self.new_symbols_Text))
+            # p_arrays.append(sum(k_text))
+            self.emit(SIGNAL('updateProgress(QString)'), "1")
+
+        print(self.all_calculations.pad3_p)
+        self.emit(SIGNAL('fill_table(QString)'), str(3))
 
 class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -83,6 +154,7 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
         self.spinBox_3.setMinimum(100)
         self.spinBox_4.setMinimum(0)
         self.flagStep = True
+        self.N = self.getFromLineEdit()
 
 
         self.file1_info = []
@@ -126,7 +198,7 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
             self.spinBox_2.setMaximum(len(self.originalText) - self.spinBox_3.value())
             self.spinBox_3.setMaximum(len(self.originalText))
             self.spinBox_4.setMaximum(len(self.originalText))
-            self.all_calculations = All_calculations(text)
+            self.all_calculations = All_calculations(text, self.N)
             self.label_3.setText(ntpath.basename(filename))
             self.label_5.setText("You can choose an area  ( 1-"+  str(len(self.originalText )) + " ) to discover, below:")
 
@@ -188,19 +260,25 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
         self.readyText = []
         self.steps = 0
         self.wholeText = []
-        self.prepearedText = self.all_calculations.splitText(self.spinBox.value(), self.isSliced, self.spinBox_2.value(), self.spinBox_3.value()+1)
+        self.prepearedText = self.all_calculations.splitText(self.spinBox.value(), self.isSliced, self.spinBox_2.value(), self.spinBox_3.value())
+        print(len(self.prepearedText))
         if self.spinBox_4.value() > 1:
             self.steps = int(len(self.originalText[self.spinBox_2.value(): len(self.originalText)])/self.spinBox_4.value())
-            print(self.steps)
+            self.step  = self.spinBox_4.value()
             self.wholeText = self.all_calculations.splitText(self.spinBox.value(), False, self.spinBox_2.value(), self.spinBox_3.value())
-        self.progressBar.setMaximum(max(len(self.prepearedText) + 12 + self.steps, len(self.wholeText)) + 12 + self.steps)
+        if(len(self.wholeText)>0):
+            self.progressBar.setMaximum(len(self.wholeText) + 12)
+        else:
+            self.progressBar.setMaximum(len(self.prepearedText) + 12)
         self.progressBar.setValue(0)
         self.disaleAll(True)
 
         #initialise second thread
-        self.calcTread = CalculateThread(self.originalText, self.prepearedText, self.isSliced, self.steps, self.wholeText)
+        self.counter = 0
+        self.calcTread = CalculateThread(self.originalText, self.prepearedText, self.isSliced, self.steps, self.step, self.wholeText, self.N)
         self.connect(self.calcTread, SIGNAL("add_binary(QString)"), self.add_binary)
         self.connect(self.calcTread, SIGNAL("fill_table(QString)"), self.fill_table)
+        self.connect(self.calcTread, SIGNAL("updateProgress(QString)"), self.updateProgress)
         self.connect(self.calcTread, SIGNAL("finished()"), self.done)
         self.pushButton_8.clicked.connect(self.calcTread.terminate)
 
@@ -211,6 +289,9 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
 
     def add_binary(self, value):
         self.new_symbols_Text.append(int(value))
+        self.progressBar.setValue(self.progressBar.value()+1)
+
+    def updateProgress(self, value):
         self.progressBar.setValue(self.progressBar.value()+1)
 
     def done(self):
@@ -225,7 +306,7 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
         value = [str(item) for item in self.lineEdit.text()]
         for item in value:
             new_value = new_value + item
-        return int( len(self.new_symbols_Text)/int(new_value))
+        return int(new_value)
 
     def fill_table(self, getTableNumber):
         if self.steps > 0 and self.isSliced and self.flagStep :
@@ -233,6 +314,7 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
             self.wholeText = self.new_symbols_Text
             self.new_symbols_Text = self.new_symbols_Text[:self.spinBox_3.value()]
             self.flagStep = False
+            print("hipe2",len(self.new_symbols_Text), len(self.prepearedText))
         tableNumber = int(getTableNumber)
         if tableNumber == 1:
             counts = Counter(self.prepearedText)
@@ -285,7 +367,6 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
             self.progressBar.setValue(self.progressBar.value()+3)
 
         elif tableNumber == 3:
-            print(self.steps)
             self.chunkedText = self.all_calculations.chunksIntervals(self.new_symbols_Text, self.getFromLineEdit())
 
         elif tableNumber == 4:

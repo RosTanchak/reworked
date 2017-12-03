@@ -14,18 +14,22 @@ from collections import Counter
 
 
 class All_calculations():
-    def __init__(self, text):
+    #N= pad3 bins
+    def __init__(self, text, N):
+        self.pad3_p = []
+        self.N = N
         self.readyText = unicode(text, "utf-8")
+        for i in range(N):
+            self.pad3_p.append([])
 
     def splitText(self, n, isSliced, startIn, finishIn):
-        print("ffffffff", n)
         if isSliced:
             slicedtext = self.readyText[startIn: startIn + finishIn]
         else:
-            slicedtext = self.readyText
+            slicedtext = self.readyText[startIn:]
         slicedtext = slicedtext.decode('utf8')
         splittedText = []
-        for item in range(len(slicedtext) - n):
+        for item in range(len(slicedtext)):
             splittedText.append(slicedtext[item:item + n])
         return splittedText
 
@@ -75,23 +79,29 @@ class All_calculations():
         return result
 
     #this function chunks readyText for intervals(which value we get from  input)
-    def chunksIntervals(self, text, N):
-        self.chunkedText = zip(*[iter(text)] * N)
-        return self.chunkedText
+    def chunksIntervals(self, text):
+        self.chunkedText = zip(*[iter(text)] * self.N)
+        index = 0
+        summary = sum(text)
+        for item in self.chunkedText:
+            self.pad3_p[index].append(self.get_p_tab3(item, summary))
+
 
     #this function is copied from c# parent. No matter how it works
-    def get_p_tab3(self):
-        result = []
-        for index in range(len(self.chunkedText)):
-            summary = 0
-            for item in self.chunkedText[index]:
-                if item:
-                    summary+=1
-            result.append(summary)
-        for item in range(len(result)):
-            result[item] = result[item]/sum(self.newWordsText)
-        self.p_pad3 = sorted(result, reverse = True)
-        self.get_P_tab3()
+    def get_p_tab3(self, item, summary):
+        p = sum(item) / summary
+        # result = []
+        # for item in self.chunkedText):
+
+        #     summary = 0
+        #     for item in self.chunkedText[index]:
+        #         if item:
+        #             summary+=1
+        #     result.append(summary)
+        # for item in range(len(result)):
+        #     result[item] = result[item]/sum(newWordsText)
+        # self.p_pad3 = sorted(result, reverse = True)
+        return  p #self.p_pad3
 
     #this function is copied from c# parent. No metter how it works(on previous interval get value)
     #takes sum of new words from previous intervals and get 1 - sum  new words on  prev intervals / general_summary

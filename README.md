@@ -27,7 +27,7 @@ To get this from git hub, use:
   3. Have fun:
     a. To develop go to directory, than use python(check if this command run right version (python --version))
       "python main.py"
-      Also if you want to add smth like button or change view of tab, then you need toinstall "pydesigner"  
+      Also if you want to add smth like button or change view of tab, then you need to install "pydesigner"  
     b. To execute as a user, go to ./dist and run "praktyka.exe"(if folder dist consist in other situation you need to build it or communicate with a person who can do it)
 
 
