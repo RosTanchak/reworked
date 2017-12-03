@@ -18,6 +18,7 @@ class All_calculations():
         self.readyText = unicode(text, "utf-8")
 
     def splitText(self, n, isSliced, startIn, finishIn):
+        print("ffffffff", n)
         if isSliced:
             slicedtext = self.readyText[startIn: startIn + finishIn]
         else:
@@ -76,7 +77,6 @@ class All_calculations():
     #this function chunks readyText for intervals(which value we get from  input)
     def chunksIntervals(self, text, N):
         self.chunkedText = zip(*[iter(text)] * N)
-        print(self.chunkedText, N)
         return self.chunkedText
 
     #this function is copied from c# parent. No matter how it works

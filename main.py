@@ -27,32 +27,42 @@ from  all_calculations import All_calculations #import all math functions
 
 
 class CalculateThread(QThread):
-    def __init__(self, text, prepearedText):
+    def __init__(self, text, prepearedText, isSliced, step, wholeText):
         QThread.__init__(self)
         self.originalText = text
         self.prepearedText = prepearedText
+        self.step = step
+        self.isSliced = isSliced
+        self.wholeText = wholeText
 
     def __del__(self):
         self.wait()
     #calculate new symbols in background
     def run(self):
         text = self.prepearedText
+        if self.isSliced == True and self.step > 0:
+            text = self.wholeText
         readyItems = []
         binaryItems = []
+        self.new_symbols_Text = []
         for item in text:
             try:
                 result = readyItems.index(item)
                 self.emit(SIGNAL('add_binary(QString)'), str(0))
                 readyItems.append(item)
+                self.new_symbols_Text.append(0)
                 # self.emit(SIGNAL('add_ready(QString)'), str(item))
             except ValueError:
                 self.emit(SIGNAL('add_binary(QString)'), str(1))
+                self.new_symbols_Text.append(1)
                 readyItems.append(item)
                 # self.emit(SIGNAL('add_ready(QString)'), str(item))
         self.emit(SIGNAL('fill_table(QString)'), str(1))
         self.emit(SIGNAL('fill_table(QString)'), str(2))
-        self.emit(SIGNAL('fill_table(QString)'), str(3))
         self.emit(SIGNAL('fill_table(QString)'), str(4))
+        #special for 3rd tab
+
+        self.emit(SIGNAL('fill_table(QString)'), str(3))
 
 
 
@@ -70,8 +80,10 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
         self.radioButton_6.clicked.connect(self.enableOrDisable)
         self.radioButton_7.clicked.connect(self.enableOrDisable)
         self.tabWidget.setTabEnabled(1, False)
-        self.spinBox_3.valueChanged.connect(self.setMax)
         self.spinBox_3.setMinimum(100)
+        self.spinBox_4.setMinimum(0)
+        self.flagStep = True
+
 
         self.file1_info = []
         self.file2_info = []
@@ -79,10 +91,6 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
         self.file4_info = []
 
         self.isSliced = False;
-
-    def setMax(self):
-        pass
-        # self.spinBox_2.setMaximum(len(self.originalText)- self.spinBox_3.value())
 
     def disaleAll(self, getValue):
         if getValue:
@@ -102,6 +110,11 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
         self.radioButton_6.setEnabled(True)
         self.radioButton_7.setEnabled(True)
         self.spinBox.setEnabled(True)
+        if self.radioButton_7.isChecked():
+            self.isSliced = True;
+            self.spinBox_2.setEnabled(True)
+            self.spinBox_3.setEnabled(True)
+            self.spinBox_4.setEnabled(True)
 
     def open_file(self):
         filename = QtGui.QFileDialog.getOpenFileName()
@@ -112,6 +125,7 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
             self.originalText = text
             self.spinBox_2.setMaximum(len(self.originalText) - self.spinBox_3.value())
             self.spinBox_3.setMaximum(len(self.originalText))
+            self.spinBox_4.setMaximum(len(self.originalText))
             self.all_calculations = All_calculations(text)
             self.label_3.setText(ntpath.basename(filename))
             self.label_5.setText("You can choose an area  ( 1-"+  str(len(self.originalText )) + " ) to discover, below:")
@@ -172,13 +186,19 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
     def build(self):
         self.new_symbols_Text = []
         self.readyText = []
-        self.prepearedText = self.all_calculations.splitText(self.spinBox.value(), self.isSliced, self.spinBox_2.value(), self.spinBox_3.value())
-        self.progressBar.setMaximum(len(self.prepearedText) + 12)
+        self.steps = 0
+        self.wholeText = []
+        self.prepearedText = self.all_calculations.splitText(self.spinBox.value(), self.isSliced, self.spinBox_2.value(), self.spinBox_3.value()+1)
+        if self.spinBox_4.value() > 1:
+            self.steps = int(len(self.originalText[self.spinBox_2.value(): len(self.originalText)])/self.spinBox_4.value())
+            print(self.steps)
+            self.wholeText = self.all_calculations.splitText(self.spinBox.value(), False, self.spinBox_2.value(), self.spinBox_3.value())
+        self.progressBar.setMaximum(max(len(self.prepearedText) + 12 + self.steps, len(self.wholeText)) + 12 + self.steps)
         self.progressBar.setValue(0)
         self.disaleAll(True)
 
         #initialise second thread
-        self.calcTread = CalculateThread(self.originalText, self.prepearedText)
+        self.calcTread = CalculateThread(self.originalText, self.prepearedText, self.isSliced, self.steps, self.wholeText)
         self.connect(self.calcTread, SIGNAL("add_binary(QString)"), self.add_binary)
         self.connect(self.calcTread, SIGNAL("fill_table(QString)"), self.fill_table)
         self.connect(self.calcTread, SIGNAL("finished()"), self.done)
@@ -205,10 +225,14 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
         value = [str(item) for item in self.lineEdit.text()]
         for item in value:
             new_value = new_value + item
-        print(int( len(self.new_symbols_Text)/int(new_value)))
         return int( len(self.new_symbols_Text)/int(new_value))
 
     def fill_table(self, getTableNumber):
+        if self.steps > 0 and self.isSliced and self.flagStep :
+            print("hipe",len(self.new_symbols_Text), len(self.prepearedText))
+            self.wholeText = self.new_symbols_Text
+            self.new_symbols_Text = self.new_symbols_Text[:self.spinBox_3.value()]
+            self.flagStep = False
         tableNumber = int(getTableNumber)
         if tableNumber == 1:
             counts = Counter(self.prepearedText)
@@ -261,8 +285,8 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
             self.progressBar.setValue(self.progressBar.value()+3)
 
         elif tableNumber == 3:
+            print(self.steps)
             self.chunkedText = self.all_calculations.chunksIntervals(self.new_symbols_Text, self.getFromLineEdit())
-            print(len(self.chunkedText))
 
         elif tableNumber == 4:
             self.big_P_x = self.all_calculations.calculate_P_tab4(self.new_symbols_Text)
