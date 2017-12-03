@@ -122,6 +122,7 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
         self.disaleAll(True)
         self.pushButton.clicked.connect(self.buildTabHist1)
         self.pushButton_2.clicked.connect(self.buildGrahTab2)
+        self.pushButton_4.clicked.connect(self.buildGrahTab3)
         self.pushButton_3.clicked.connect(self.buildGrahTab4)
         self.pushButton_5.clicked.connect(self.open_file)
         self.pushButton_6.clicked.connect(self.save_file)
@@ -155,6 +156,7 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
             self.spinBox_4.setEnabled(False)
             self.lineEdit.setEnabled(False)
             return
+        self.pushButton_5.setEnabled(True)
         self.pushButton_6.setEnabled(True)
         self.pushButton_7.setEnabled(True)
         self.pushButton_8.setEnabled(True)
@@ -244,6 +246,7 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
         self.step = 0
         self.wholeText = []
         self.all_calculations.clearAll()
+        self.pushButton_5.setEnabled(False)
         self.prepearedText = self.all_calculations.splitText(self.spinBox.value(), self.isSliced, self.spinBox_2.value(), self.spinBox_3.value())
         if self.spinBox_4.value() > 1:
             self.steps = int(len(self.originalText[self.spinBox_2.value(): len(self.originalText)])/self.spinBox_4.value())
@@ -353,7 +356,6 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
             self.P_pad3 = self.all_calculations.P_pad3
             self.tableWidget_4.setRowCount(self.N)
             for itemRow in range(0,len(self.all_calculations.pad3_p)):
-                print(self.P_pad3[itemRow])
                 item0 = QTableWidgetItem()
                 item0.setData(Qt.DisplayRole, itemRow + 1)
                 item1 = QTableWidgetItem()
@@ -441,6 +443,65 @@ class PraktykaApp(QtGui.QMainWindow, ui_design.Ui_MainWindow):
             plt.plot(x, y, 'k', marker='o')
             plt.grid(color='b', linestyle='-', linewidth=0.5)
             plt.show()
+
+
+
+    #this function build graphic via mat plot lib , here it build one which is
+    #checked
+    def buildGrahTab3(self):
+        self.chunksIntervals()
+        if self.radioButton_5.isChecked():
+            #calc sum of new symbols/ngrams again
+            counts = Counter(result)
+            #labels, values = zip(*counts.items())
+
+            #indexes = np.arange(len(labels))
+            bar_width = 0.35
+            #   here2
+            newRes = []
+            newInd = []
+            for i in range(len(result)):
+                if result[i] != 0:
+                    newRes.append(math.log10(result[i]))
+                    newInd.append(i)
+
+            plt.bar(newInd, newRes, width = bar_width)
+            # add labels
+            #plt.xticks(indexes + bar_width, labels)
+            plt.show()
+        elif self.radioButton_4.isChecked():
+            iteration_x = []
+            iteration_y = self.P_pad3
+            newRes = []
+            newInd = []
+            for i in range(len(self.P_pad3)):
+                if iteration_y[i] != 0:
+                    newInd.append(math.log10(i+1))
+                    newRes.append(math.log10(iteration_y[i]))
+            x = newInd
+            #x = [math.log10(item) for item in iteration_x]
+
+            y =  newRes
+
+            plt.plot(x, y, 'k',  marker='o')
+            plt.grid(color='b', linestyle='-', linewidth=0.5)
+            plt.show()
+
+        elif self.radioButton_3.isChecked():
+            iteration_x = []
+            iteration_y = self.p_pad3
+            newArrayY = []
+            for i in range(len(self.p_pad3)):
+                if iteration_y[i] != 0:
+                    iteration_x.append(math.log10(i+1))
+                    newArrayY.append(math.log10(iteration_y[i]))
+            x = iteration_x
+            y = newArrayY
+
+            plt.plot(x, y, 'k',  marker='o')
+            plt.grid(color='b', linestyle='-', linewidth=0.5)
+            plt.show()
+
 
     def buildGrahTab4(self):
         iteration_x = []

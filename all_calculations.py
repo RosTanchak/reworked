@@ -17,6 +17,7 @@ class All_calculations():
     #N= pad3 bins
     def __init__(self, text, N):
         self.pad3_p = []
+        self.pad3_items_value = []
         self.N = N
         self.readyText = unicode(text, "utf-8")
         for i in range(self.N):
@@ -88,11 +89,13 @@ class All_calculations():
         self.results3Pad.append(summary)
         for item in self.chunkedText:
             self.pad3_p[index].append(self.get_p_tab3(item, summary))
+            self.pad3_items_value.append([sum(item), summary])
             index+=1
 
 
     #this function is copied from c# parent. No matter how it works
     def get_p_tab3(self, item, summary):
+        #how much 1
         p = sum(item) / len(item)
         # result = []
         # for item in self.chunkedText):
@@ -115,6 +118,7 @@ class All_calculations():
         self.p_i_schtrich = []
         self.P_pad3 = []
         for item in self.pad3_p:
+            print(item)
             self.small_p_3.append(sum(item)/steps)
         # self.p_pad3 = sorted(result, reverse = True)
         for item in self.small_p_3:
@@ -129,27 +133,20 @@ class All_calculations():
         self.small_p_3 = []
         self.p_i_schtrich = []
         self.P_pad3 = []
+        self.pad3_items_value = []
         for i in range(self.N):
             self.pad3_p[i] = []
 
-
-    def get_P_tab3(self):
-        result = []
-        current_p = 1.0
-        for index in range(len(self.p_i_schtrich)):
-            summary = 0
-            for item in self.pad3_p[index]:
-                if item:
-                    summary+=1
-            result.append(summary)
-        new_result = []
-        new_result.append(current_p)
-        general_summary = sum(result)
-        for item in range(1, len(result)):
-            new_result.append( current_p - (sum(result[0:item])/general_summary))
-        self.P_pad3 = new_result
-        self.calcAverage()
-
+    # 
+    # def get_P_tab3(self,steps):
+    #     current_p = 1.0
+    #     new_result = []
+    #     new_result.append(current_p)
+    #     for item in self.pad3_items_value:
+    #         if (item[1] != 0):
+    #             new_result.append( current_p - ((sum(item[0])/steps)/(sum(item[1])/steps)))
+    #     self.P_pad3 = new_result
+    #     return sorted(new_result, reverse = True)
     #this function calculate average items
     # def calcAverage(self):
     #     self.listOfAverages = []
